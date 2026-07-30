@@ -8,7 +8,7 @@ class Settings(BaseSettings):
 
     app_name: str = "CivicGuard AI"
     api_v1_prefix: str = "/api/v1"
-    database_url: str = "sqlite:///./civicguard.db"
+    database_url: str = "postgresql+psycopg://postgres:[YOUR-PASSWORD]@db.oezknuwiteyqpmrevhzh.supabase.co:5432/postgres"
     supabase_url: str = ""
     supabase_service_role_key: str = ""
     supabase_storage_bucket: str = "reports"

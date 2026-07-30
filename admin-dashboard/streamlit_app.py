@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import Counter
+import os
 
 import pandas as pd
 import pydeck as pdk
@@ -8,7 +9,15 @@ import requests
 import streamlit as st
 
 
-API_BASE = st.secrets.get("API_BASE_URL", "http://localhost:8000/api/v1")
+def get_api_base() -> str:
+    default_api_base = os.getenv("API_BASE_URL", "http://localhost:8000/api/v1")
+    try:
+        return st.secrets.get("API_BASE_URL", default_api_base)
+    except FileNotFoundError:
+        return default_api_base
+
+
+API_BASE = get_api_base()
 
 st.set_page_config(page_title="CivicGuard AI Dashboard", page_icon="🛰️", layout="wide")
 
@@ -32,20 +41,29 @@ st.markdown('<div class="hero"><h1>Citizen Grievance-to-Action Dashboard</h1><p>
 
 @st.cache_data(ttl=30)
 def load_reports() -> list[dict]:
-    response = requests.get(f"{API_BASE}/reports", timeout=20)
-    response.raise_for_status()
-    return response.json()
+    try:
+        response = requests.get(f"{API_BASE}/reports", timeout=20)
+        response.raise_for_status()
+        return response.json()
+    except (requests.RequestException, ValueError):
+        return []
 
 
 @st.cache_data(ttl=300)
 def load_departments() -> list[dict]:
-    response = requests.get(f"{API_BASE}/departments", timeout=20)
-    response.raise_for_status()
-    return response.json()
+    try:
+        response = requests.get(f"{API_BASE}/departments", timeout=20)
+        response.raise_for_status()
+        return response.json()
+    except (requests.RequestException, ValueError):
+        return []
 
 
 reports = load_reports()
 departments = load_departments()
+
+if not reports or not departments:
+    st.warning("Backend API is unavailable, so the dashboard is showing an empty fallback view.")
 
 severity_counts = Counter(report["severity"] for report in reports)
 risk_counts = Counter(report["dengue_risk"] for report in reports)

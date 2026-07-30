@@ -7,14 +7,14 @@ This repository is scaffolded around the SRS you provided:
 - Backend: FastAPI
 - Citizen app: React + Vite
 - Admin dashboard: Streamlit
-- Database: PostgreSQL in production, SQLite by default for local development
+- Database: PostgreSQL/Supabase with a direct connection for backend startup
 - Weather: Open-Meteo
 - ML: MobileNetV2-style training workflow with a demo-safe fallback classifier
-- Database: SQLite for local development, PostgreSQL/Supabase-ready for production
+- Database: PostgreSQL/Supabase-ready for production and local startup
 
 ## Local run
 
-1. Copy `.env.example` to `.env`.
+1. Copy `.env.example` to `.env` and set your Supabase database password in `DATABASE_URL`.
 2. Start the backend:
 
 ```bash
@@ -62,7 +62,8 @@ database/supabase_schema.sql
 - The repo includes the production-ready architecture choices from the SRS.
 - The ML training path is included, but the app also works with a deterministic fallback so the demo is not blocked on model training.
 - For Supabase, set `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, and `SUPABASE_STORAGE_BUCKET` in `.env`. The publishable key is safe to share; the service-role key is only needed if you want server-side uploads to Supabase Storage.
-- For PostgreSQL, set `DATABASE_URL` to a PostgreSQL connection string such as `postgresql+psycopg://user:password@host:5432/dbname`.
+- If you want the React frontend to talk to Supabase directly, also set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in `frontend/.env.local` or copy them from `.env.example`.
+- For PostgreSQL/Supabase, set `DATABASE_URL` to the Supabase direct connection string in `.env`.
 
 ## Supabase CLI
 

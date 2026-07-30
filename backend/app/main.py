@@ -1,6 +1,9 @@
+import logging
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy.exc import OperationalError
 
 from app.core.config import settings
 from app.db import init_db
@@ -12,6 +15,7 @@ from app.routers.weather import router as weather_router
 from app.services.storage import storage_root
 
 app = FastAPI(title=settings.app_name, version="1.0.0")
+logger = logging.getLogger(__name__)
 
 app.add_middleware(
     CORSMiddleware,
@@ -32,7 +36,10 @@ app.mount("/media", StaticFiles(directory=storage_root()), name="media")
 
 @app.on_event("startup")
 def on_startup() -> None:
-    init_db()
+    try:
+        init_db()
+    except OperationalError as exc:
+        logger.warning("Database initialization skipped because the Supabase connection is unavailable: %s", exc)
 
 
 @app.get("/")
