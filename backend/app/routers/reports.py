@@ -16,6 +16,7 @@ from app.services.ml import classify_report, prediction_to_dict
 from app.services.routing import route_issue
 from app.services.storage import save_photo
 from app.services.weather import fetch_weather_forecast
+from app.services.notify import notify_department_by_email
 
 router = APIRouter(prefix="/reports", tags=["reports"])
 
@@ -110,12 +111,19 @@ async def create_report(
         hazard_type=prediction.hazard_type,
         severity=prediction.severity,
         confidence=prediction.confidence,
-        model_name="demo-heuristic",
+        model_name="mobilenetv2_civicguard",
         raw_output=str(prediction_to_dict(prediction)),
     )
     db.add(audit)
     db.commit()
     db.refresh(report)
+    # notify department (best-effort)
+    dept_email = report.department.contact_email if report.department else None
+    try:
+        notify_department_by_email(dept_email, report.id, f"{report.hazard_type} ({report.severity}) at {report.lat},{report.lng}")
+    except Exception:
+        # notifications must not break report creation
+        pass
     return ReportCreatedResponse(report=_serialize_report(report), duplicate_of=report.is_duplicate_of)
 
 

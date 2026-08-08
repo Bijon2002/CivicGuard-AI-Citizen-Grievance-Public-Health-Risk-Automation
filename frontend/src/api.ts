@@ -79,3 +79,52 @@ export async function fetchWeather(lat: number, lng: number) {
   if (!response.ok) throw new Error('Failed to fetch weather');
   return response.json();
 }
+
+export async function adminLogin(email: string, password: string) {
+  const response = await fetch(`${API_BASE}/auth/login`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email, password }),
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    // FastAPI validation errors return detail as an array; auth errors return a string
+    const detail = errorData.detail;
+    if (Array.isArray(detail)) {
+      throw new Error(detail.map((d: any) => d.msg).join(', '));
+    }
+    throw new Error(typeof detail === 'string' ? detail : 'Invalid username or password');
+  }
+  return response.json();
+}
+
+export async function adminTestNotify(departmentEmail: string | null) {
+  const url = `${API_BASE}/health/admin/test-notify`;
+  const token = import.meta.env.VITE_INTERNAL_SERVICE_TOKEN ?? '';
+  const payload = { department_email: departmentEmail };
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Internal-Token': token,
+    },
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.detail ?? 'Notification failed');
+  }
+  return response.json();
+}
+
+export async function fetchSupabaseHealth() {
+  const url = `${API_BASE}/health/supabase`;
+  const response = await fetch(url);
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.detail ?? 'Supabase health check failed');
+  }
+  return response.json();
+}

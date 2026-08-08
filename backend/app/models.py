@@ -88,7 +88,7 @@ class PredictionAudit(Base):
     hazard_type: Mapped[str] = mapped_column(String(100), nullable=False)
     severity: Mapped[str] = mapped_column(String(20), nullable=False)
     confidence: Mapped[float] = mapped_column(Float, nullable=False)
-    model_name: Mapped[str] = mapped_column(String(100), nullable=False, default="demo-heuristic")
+    model_name: Mapped[str] = mapped_column(String(100), nullable=False, default="mobilenetv2_civicguard")
     raw_output: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 

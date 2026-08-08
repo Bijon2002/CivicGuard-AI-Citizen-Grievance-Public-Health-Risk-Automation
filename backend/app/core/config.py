@@ -19,6 +19,14 @@ class Settings(BaseSettings):
     public_base_url: str = "http://localhost:8000"
     open_meteo_timeout_seconds: int = 15
     allowed_origins: str = "http://localhost:5173,http://localhost:8501"
+    # SMTP settings (optional) - if set, backend will attempt to send notification emails
+    smtp_host: str | None = None
+    smtp_port: int | None = None
+    smtp_user: str | None = None
+    smtp_password: str | None = None
+    smtp_from: str | None = None
+    # Extra API key placeholder for external services (do NOT commit real keys)
+    extra_api_key: str | None = None
 
     @property
     def cors_origins(self) -> list[str]:

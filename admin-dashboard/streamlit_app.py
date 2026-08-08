@@ -36,6 +36,31 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+# Authentication State
+if "logged_in" not in st.session_state:
+    st.session_state["logged_in"] = False
+
+if not st.session_state["logged_in"]:
+    with st.sidebar:
+        st.header("Admin Login")
+        username = st.text_input("Username")
+        password = st.text_input("Password", type="password")
+        if st.button("Login"):
+            if username == "admin" and password == "admin":
+                st.session_state["logged_in"] = True
+                st.rerun()
+            else:
+                st.error("Invalid username or password")
+    
+    st.markdown('<div class="hero"><h1>Citizen Grievance-to-Action Dashboard</h1><p>Please log in from the sidebar to access the admin dashboard.</p></div>', unsafe_allow_html=True)
+    st.stop()
+else:
+    with st.sidebar:
+        st.success("Logged in as Admin")
+        if st.button("Logout"):
+            st.session_state["logged_in"] = False
+            st.rerun()
+
 st.markdown('<div class="hero"><h1>Citizen Grievance-to-Action Dashboard</h1><p>Monitor hazards, routing, and dengue risk flags in one place.</p></div>', unsafe_allow_html=True)
 
 

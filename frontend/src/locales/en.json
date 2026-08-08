@@ -1,0 +1,32 @@
+{
+  "translation": {
+    "app_title": "CivicGuard AI",
+    "app_subtitle": "Report hazards fast. Route them automatically. Flag dengue risk before it spreads.",
+    "app_description": "Citizen upload, AI severity classification, department routing, and weather-based outbreak warnings in one workflow.",
+    "departments": "Departments",
+    "open_reports": "Open reports",
+    "high_dengue_risk": "High dengue risk",
+    "citizen_report_title": "Citizen report",
+    "citizen_report_desc": "Upload a photo, share your location, and let the system route the issue.",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "photo": "Photo",
+    "description": "Description",
+    "use_location": "Use my location",
+    "submitting": "Submitting...",
+    "submit_report": "Submit report",
+    "weather_preview": "Weather preview",
+    "status_lookup": "Status lookup",
+    "look_up": "Look up",
+    "department_routing": "Department routing",
+    "latest_reports": "Latest reports",
+    "admin_login": "Admin Login",
+    "username": "Username",
+    "password": "Password",
+    "login": "Login",
+    "logout": "Logout",
+    "dashboard": "Admin Dashboard",
+    "nav_citizen": "Citizen Portal",
+    "nav_admin": "Admin Portal"
+  }
+}
