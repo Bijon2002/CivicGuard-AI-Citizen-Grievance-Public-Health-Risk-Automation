@@ -33,18 +33,29 @@ from app.models import Base, Department, User  # noqa: E402
 from app.core.security import hash_password  # noqa: E402
 
 
+_initialized = False
+
+
+def init_db() -> None:
+    global _initialized
+    try:
+        Base.metadata.create_all(bind=engine)
+        with SessionLocal() as session:
+            seed_defaults(session)
+        _initialized = True
+        logger.info("Database initialized and default users seeded successfully.")
+    except Exception as exc:
+        logger.warning("Database initialization error: %s", exc)
+
+
 def get_db() -> Generator[Session, None, None]:
+    if not _initialized:
+        init_db()
     db = SessionLocal()
     try:
         yield db
     finally:
         db.close()
-
-
-def init_db() -> None:
-    Base.metadata.create_all(bind=engine)
-    with SessionLocal() as session:
-        seed_defaults(session)
 
 
 def seed_defaults(session: Session) -> None:
