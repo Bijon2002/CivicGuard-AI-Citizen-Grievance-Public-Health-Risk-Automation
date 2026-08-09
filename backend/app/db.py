@@ -9,7 +9,7 @@ from app.core.config import settings
 if settings.database_url.startswith("sqlite"):
     engine_kwargs: dict[str, object] = {"future": True, "connect_args": {"check_same_thread": False}}
 else:
-    engine_kwargs: dict[str, object] = {"future": True, "connect_args": {"connect_timeout": 10}}
+    engine_kwargs: dict[str, object] = {"future": True, "connect_args": {"connect_timeout": 10, "sslmode": "require"}}
 
 engine = create_engine(settings.database_url, **engine_kwargs)
 SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False, future=True)

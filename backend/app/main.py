@@ -40,6 +40,16 @@ app.include_router(weather_router, prefix=settings.api_v1_prefix)
 app.mount("/media", StaticFiles(directory=storage_root()), name="media")
 
 
+@app.exception_handler(Exception)
+async def global_exception_handler(request, exc: Exception):
+    logger.error("Unhandled error: %s", exc, exc_info=True)
+    from fastapi.responses import JSONResponse
+    return JSONResponse(
+        status_code=500,
+        content={"detail": f"Backend Error: {str(exc)}"},
+    )
+
+
 @app.on_event("startup")
 def on_startup() -> None:
     try:
