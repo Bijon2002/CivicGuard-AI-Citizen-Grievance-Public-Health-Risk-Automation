@@ -48,7 +48,7 @@ export default function Navigation() {
             <select
               className="cursor-pointer appearance-none bg-transparent pr-1 font-bold text-slate-800 outline-none"
               value={i18n?.language ?? 'en'}
-              onChange={(e) => i18n?.changeLanguage?.(e.target.value)}
+              onChange={(e) => { if (i18n && typeof i18n.changeLanguage === 'function') { i18n.changeLanguage(e.target.value); } }}
             >
               <option value="en">English</option>
               <option value="si">සිංහල</option>
