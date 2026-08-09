@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from uuid import uuid4
 
-from sqlalchemy import ARRAY, DateTime, Float, ForeignKey, String, Text, Uuid, func
+from sqlalchemy import ARRAY, DateTime, Float, ForeignKey, JSON, String, Text, Uuid, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
@@ -20,7 +20,7 @@ class Department(Base):
 
     id: Mapped[str] = mapped_column(Uuid(as_uuid=False), primary_key=True, default=default_uuid)
     name: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
-    issue_types: Mapped[list[str]] = mapped_column(ARRAY(Text), nullable=False, default=list)
+    issue_types: Mapped[list[str]] = mapped_column(JSON().with_variant(ARRAY(Text), "postgresql"), nullable=False, default=list)
     contact_email: Mapped[str | None] = mapped_column(String(255), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 

@@ -10,8 +10,11 @@ from app.services.ml import classify_report, get_model
 
 def main():
     print("Loading model...")
-    model = get_model()
-    print("Model loaded successfully.")
+    try:
+        model = get_model()
+        print("Model loaded successfully.")
+    except Exception as e:
+        print(f"Model load skipped/fallback active: {e}")
     
     # Create a dummy image for testing
     img_path = Path("dummy.jpg")

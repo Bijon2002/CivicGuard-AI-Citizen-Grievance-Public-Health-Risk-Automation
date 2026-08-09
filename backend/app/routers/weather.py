@@ -1,3 +1,5 @@
+from dataclasses import asdict
+
 from fastapi import APIRouter, HTTPException, Query
 
 from app.schemas import WeatherDayOut, WeatherSummaryOut
@@ -16,5 +18,5 @@ async def weather(lat: float = Query(..., alias="lat"), lng: float = Query(..., 
         latitude=lat,
         longitude=lng,
         risk_window_days=5,
-        days=[WeatherDayOut.model_validate(day.__dict__) for day in forecast[:5]],
+        days=[WeatherDayOut(**asdict(day)) for day in forecast[:5]],
     )

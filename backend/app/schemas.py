@@ -15,6 +15,8 @@ class TokenResponse(BaseModel):
     token_type: str = "bearer"
     role: str
     email: str
+    department_id: str | None = None
+    department_name: str | None = None
 
 
 class LoginRequest(BaseModel):

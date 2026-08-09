@@ -6,11 +6,12 @@ import AdminDashboard from './pages/AdminDashboard';
 
 export default function App() {
   return (
-    <div className="min-h-screen bg-[#0b1020] bg-hero-grid text-white flex flex-col">
+    <div className="min-h-screen bg-slate-50 bg-hero-gradient text-slate-900 flex flex-col selection:bg-emerald-500 selection:text-white">
       <Navigation />
       <div className="flex-1">
         <Routes>
           <Route path="/" element={<CitizenView />} />
+          <Route path="/login" element={<AdminLogin />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
         </Routes>

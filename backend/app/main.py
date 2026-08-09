@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
+    allow_origin_regex=r"http://(localhost|127\.0\.0\.1)(:\d+)?",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -38,7 +39,7 @@ app.mount("/media", StaticFiles(directory=storage_root()), name="media")
 def on_startup() -> None:
     try:
         init_db()
-    except OperationalError as exc:
+    except Exception as exc:
         logger.warning("Database initialization skipped because the Supabase connection is unavailable: %s", exc)
 
 

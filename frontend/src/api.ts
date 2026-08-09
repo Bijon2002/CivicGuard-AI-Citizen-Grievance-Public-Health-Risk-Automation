@@ -18,6 +18,7 @@ export type Report = {
   status: string;
   created_at: string;
   department_name?: string | null;
+  description?: string | null;
 };
 
 export type ReportDetail = Report & {
@@ -70,7 +71,14 @@ export async function submitReport(formData: FormData) {
     method: 'POST',
     body: formData,
   });
-  if (!response.ok) throw new Error('Failed to submit report');
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    const detail = errorData.detail;
+    if (Array.isArray(detail)) {
+      throw new Error(detail.map((d: any) => `${d.loc?.[1] || 'field'}: ${d.msg}`).join(', '));
+    }
+    throw new Error(typeof detail === 'string' ? detail : 'Failed to submit report');
+  }
   return response.json();
 }
 
@@ -125,6 +133,23 @@ export async function fetchSupabaseHealth() {
   if (!response.ok) {
     const err = await response.json().catch(() => ({}));
     throw new Error(err.detail ?? 'Supabase health check failed');
+  }
+  return response.json();
+}
+
+export async function updateReportStatus(reportId: string, status: string) {
+  const token = localStorage.getItem('token') ?? '';
+  const response = await fetch(`${API_BASE}/reports/${reportId}/status`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({ status }),
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || 'Failed to update status');
   }
   return response.json();
 }

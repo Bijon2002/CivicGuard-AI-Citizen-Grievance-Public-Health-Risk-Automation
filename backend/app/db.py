@@ -6,7 +6,10 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from app.core.config import settings
 
-engine_kwargs: dict[str, object] = {"future": True}
+if settings.database_url.startswith("sqlite"):
+    engine_kwargs: dict[str, object] = {"future": True, "connect_args": {"check_same_thread": False}}
+else:
+    engine_kwargs: dict[str, object] = {"future": True, "connect_args": {"connect_timeout": 3}}
 
 engine = create_engine(settings.database_url, **engine_kwargs)
 SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False, future=True)
@@ -41,10 +44,16 @@ def seed_defaults(session: Session) -> None:
         session.commit()
 
     if session.scalar(select(User.id).limit(1)) is None:
+        mc_id = session.scalar(select(Department.id).where(Department.name == "Municipal Council"))
+        wb_id = session.scalar(select(Department.id).where(Department.name == "Water Board"))
+        rda_id = session.scalar(select(Department.id).where(Department.name == "Road Development Authority"))
+        pho_id = session.scalar(select(Department.id).where(Department.name == "Public Health Office"))
         users = [
             User(id=str(uuid4()), email="admin@civicguard.local", password_hash=hash_password("Admin@1234!"), role="admin", department_id=None),
-            User(id=str(uuid4()), email="officer@civicguard.local", password_hash=hash_password("Officer@1234!"), role="officer", department_id=session.scalar(select(Department.id).where(Department.name == "Municipal Council"))),
-            User(id=str(uuid4()), email="health@civicguard.local", password_hash=hash_password("Health@1234!"), role="health_official", department_id=session.scalar(select(Department.id).where(Department.name == "Public Health Office"))),
+            User(id=str(uuid4()), email="council@civicguard.local", password_hash=hash_password("Council@1234!"), role="officer", department_id=mc_id),
+            User(id=str(uuid4()), email="waterboard@civicguard.local", password_hash=hash_password("Water@1234!"), role="officer", department_id=wb_id),
+            User(id=str(uuid4()), email="roads@civicguard.local", password_hash=hash_password("Roads@1234!"), role="officer", department_id=rda_id),
+            User(id=str(uuid4()), email="health@civicguard.local", password_hash=hash_password("Health@1234!"), role="health_official", department_id=pho_id),
         ]
         session.add_all(users)
         session.commit()
