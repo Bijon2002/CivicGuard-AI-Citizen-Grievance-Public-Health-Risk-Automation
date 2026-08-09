@@ -1,3 +1,4 @@
+import logging
 from collections.abc import Generator
 from uuid import uuid4
 
@@ -6,12 +7,26 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from app.core.config import settings
 
-if settings.database_url.startswith("sqlite"):
-    engine_kwargs: dict[str, object] = {"future": True, "connect_args": {"check_same_thread": False}}
-else:
-    engine_kwargs: dict[str, object] = {"future": True, "connect_args": {"connect_timeout": 10, "sslmode": "require"}}
+logger = logging.getLogger(__name__)
 
-engine = create_engine(settings.database_url, **engine_kwargs)
+
+def build_engine():
+    db_url = settings.database_url
+    if db_url.startswith("sqlite"):
+        return create_engine(db_url, future=True, connect_args={"check_same_thread": False})
+
+    try:
+        eng = create_engine(db_url, future=True, connect_args={"connect_timeout": 5})
+        with eng.connect() as conn:
+            conn.execute(select(1))
+        logger.info("Successfully connected to primary database.")
+        return eng
+    except Exception as exc:
+        logger.warning("Primary database connection failed (%s). Falling back to SQLite database.", exc)
+        return create_engine("sqlite:///./civicguard.db", future=True, connect_args={"check_same_thread": False})
+
+
+engine = build_engine()
 SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False, future=True)
 
 from app.models import Base, Department, User  # noqa: E402
