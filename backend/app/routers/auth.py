@@ -9,6 +9,8 @@ from app.schemas import LoginRequest, TokenResponse, UserOut
 from sqlalchemy import select
 from app.db import seed_defaults
 
+router = APIRouter(prefix="/auth", tags=["auth"])
+
 HARDCODED_DEFAULTS = {
     "admin@civicguard.local": {"role": "admin", "department_id": None, "department_name": None},
     "council@civicguard.local": {"role": "officer", "department_id": "mc-dept", "department_name": "Municipal Council"},
