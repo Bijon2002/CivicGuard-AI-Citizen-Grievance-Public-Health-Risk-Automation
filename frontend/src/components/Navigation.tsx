@@ -47,8 +47,8 @@ export default function Navigation() {
             <Globe className="h-3.5 w-3.5 text-emerald-600" />
             <select
               className="cursor-pointer appearance-none bg-transparent pr-1 font-bold text-slate-800 outline-none"
-              value={i18n.language}
-              onChange={(e) => i18n.changeLanguage(e.target.value)}
+              value={i18n?.language ?? 'en'}
+              onChange={(e) => i18n?.changeLanguage?.(e.target.value)}
             >
               <option value="en">English</option>
               <option value="si">සිංහල</option>
