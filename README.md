@@ -19,8 +19,8 @@ This repository is scaffolded around the SRS you provided:
 
 ```bash
 cd backend
-pip install -r requirements.txt
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+d:/AI_Driven_Srilanka/.venv/Scripts/python.exe -m pip install -r requirements.txt
+d:/AI_Driven_Srilanka/.venv/Scripts/python.exe -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 3. Start the citizen + admin React app (single frontend):
@@ -35,8 +35,8 @@ npm run dev
 
 ```bash
 cd backend
-pip install -r requirements.txt
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+d:/AI_Driven_Srilanka/.venv/Scripts/python.exe -m pip install -r requirements.txt
+d:/AI_Driven_Srilanka/.venv/Scripts/python.exe -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 5. Train the ML model in Colab or locally:

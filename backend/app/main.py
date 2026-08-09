@@ -56,13 +56,18 @@ async def cors_middleware(request: Request, call_next):
 
 
 # ---------- ROUTES ----------
-app.include_router(health_router)
+app.include_router(health_router, prefix=settings.api_v1_prefix)
 app.include_router(auth_router, prefix=settings.api_v1_prefix)
 app.include_router(departments_router, prefix=settings.api_v1_prefix)
 app.include_router(reports_router, prefix=settings.api_v1_prefix)
 app.include_router(weather_router, prefix=settings.api_v1_prefix)
 
 app.mount("/media", StaticFiles(directory=storage_root()), name="media")
+
+
+@app.get("/health")
+def root_health() -> dict[str, str]:
+    return {"status": "ok"}
 
 
 @app.on_event("startup")
