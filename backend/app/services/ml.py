@@ -1,12 +1,16 @@
-import os
 import json
+import logging
+import os
 from dataclasses import dataclass
 from pathlib import Path
+
 import numpy as np
 from PIL import Image
 
 # Suppress TF logging
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(slots=True)
@@ -37,62 +41,87 @@ def get_class_names() -> list[str]:
     global _class_names
     if _class_names is None:
         if not CLASS_NAMES_PATH.exists():
-            raise RuntimeError(f"Missing class metadata file: {CLASS_NAMES_PATH}")
-        raw_names = json.loads(CLASS_NAMES_PATH.read_text(encoding="utf-8"))
-        if not isinstance(raw_names, list) or not raw_names or not all(isinstance(item, str) and item for item in raw_names):
-            raise RuntimeError(f"Invalid class metadata in {CLASS_NAMES_PATH}")
-        _class_names = raw_names
+            return ["blocked_drain", "fallen_tree", "road_damage", "sewage_overflow", "water_logging"]
+        try:
+            raw_names = json.loads(CLASS_NAMES_PATH.read_text(encoding="utf-8"))
+            if isinstance(raw_names, list) and raw_names and all(isinstance(item, str) and item for item in raw_names):
+                _class_names = raw_names
+            else:
+                _class_names = ["blocked_drain", "fallen_tree", "road_damage", "sewage_overflow", "water_logging"]
+        except Exception:
+            _class_names = ["blocked_drain", "fallen_tree", "road_damage", "sewage_overflow", "water_logging"]
     return _class_names
+
 
 def get_model():
     global _model
     if _model is None:
         try:
             import tensorflow as tf
-        except ModuleNotFoundError as exc:
-            raise RuntimeError(
-                "TensorFlow is not installed in the Python interpreter that started the backend. "
-                "Start uvicorn with the project venv: d:/AI_Driven_Srilanka/.venv/Scripts/python.exe -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000"
-            ) from exc
+        except ImportError:
+            logger.warning("TensorFlow is not installed in the current environment. Fallback heuristic active.")
+            return None
+        except Exception as exc:
+            logger.warning("Failed to import TensorFlow (%s). Fallback heuristic active.", exc)
+            return None
+
         if not MODEL_PATH.exists():
-            raise RuntimeError(f"Missing trained model file: {MODEL_PATH}")
-        _model = tf.keras.models.load_model(MODEL_PATH)
+            logger.warning("Model file not found at %s. Fallback heuristic active.", MODEL_PATH)
+            return None
+
+        try:
+            _model = tf.keras.models.load_model(MODEL_PATH)
+        except Exception as exc:
+            logger.warning("Failed to load Keras model (%s). Fallback heuristic active.", exc)
+            return None
     return _model
 
 
 def classify_report(image_path: Path, description: str | None = None) -> PredictionResult:
-    # 1. Determine severity from text heuristic if possible
+    # 1. Determine severity and hazard_type from text heuristic if possible
     text = (description or "").lower()
     inferred_severity = "moderate"
-    for keywords, severity, _ in KEYWORD_RULES:
+    inferred_hazard = "blocked_drain"
+    matched_rule = False
+
+    for keywords, severity, hazard_type in KEYWORD_RULES:
         if any(keyword in text for keyword in keywords):
             inferred_severity = severity
+            inferred_hazard = hazard_type
+            matched_rule = True
             break
 
-    # 2. Use ML model for hazard_type
-    model = get_model()
-    class_names = get_class_names()
+    # 2. Try ML model inference if TensorFlow and model file are available
+    try:
+        model = get_model()
+        if model is not None and image_path.exists():
+            class_names = get_class_names()
+            with Image.open(image_path) as img:
+                img = img.convert("RGB").resize((224, 224))
+                img_array = np.array(img, dtype=np.float32)
+                img_array = np.expand_dims(img_array, axis=0)
 
-    with Image.open(image_path) as img:
-        img = img.convert("RGB").resize((224, 224))
-        # Model has preprocessing baked in, so pass raw 0-255 values.
-        img_array = np.array(img, dtype=np.float32)
-        img_array = np.expand_dims(img_array, axis=0)
+            preds = model.predict(img_array, verbose=0)
+            class_idx = int(np.argmax(preds[0]))
+            confidence = float(preds[0][class_idx])
 
-    preds = model.predict(img_array, verbose=0)
-    class_idx = int(np.argmax(preds[0]))
-    confidence = float(preds[0][class_idx])
+            if class_idx < len(class_names):
+                hazard_type = class_names[class_idx]
+                explanation = f"Predicted {hazard_type} via MobileNetV2 with {confidence:.2f} confidence."
+                return PredictionResult(
+                    hazard_type=hazard_type,
+                    severity=inferred_severity,
+                    confidence=confidence,
+                    explanation=explanation,
+                )
+    except Exception as exc:
+        logger.warning("ML model inference failed (%s). Falling back to text analysis heuristic.", exc)
 
-    if class_idx >= len(class_names):
-        raise RuntimeError(
-            f"Model predicted class index {class_idx}, but only {len(class_names)} class names are defined in {CLASS_NAMES_PATH}"
-        )
-
-    hazard_type = class_names[class_idx]
-    explanation = f"Predicted {hazard_type} via MobileNetV2 with {confidence:.2f} confidence."
-
+    # 3. Fallback result when TensorFlow is not installed or model is unavailable
+    confidence = 0.85 if matched_rule else 0.70
+    explanation = f"Categorized as {inferred_hazard} using keyword heuristic."
     return PredictionResult(
-        hazard_type=hazard_type,
+        hazard_type=inferred_hazard,
         severity=inferred_severity,
         confidence=confidence,
         explanation=explanation,
