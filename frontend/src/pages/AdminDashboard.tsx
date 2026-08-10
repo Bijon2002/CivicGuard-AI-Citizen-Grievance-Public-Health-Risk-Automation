@@ -54,22 +54,22 @@ const DEPT_PRESETS: Record<string, DeptPreset> = {
     ],
   },
   'Public Health Office': {
-    commandTitle: 'Vector Control & Epidemic Prevention Command',
-    subTitle: 'Specialized dengue outbreak prevention, mosquito breeding site fumigation, and chemical larvicide.',
+    commandTitle: 'Public Health & Hazard Safety Command',
+    subTitle: 'Public health risk mitigation, sanitation, water contamination response, and environmental safety.',
     graphicImg: '/dept_health.png',
     accentBg: 'bg-gradient-to-r from-cyan-50 to-teal-50/70',
     accentBorder: 'border-cyan-200/90',
     badgeBg: 'bg-cyan-100 text-cyan-900 border-cyan-300',
     badgeText: 'text-cyan-950',
     crews: [
-      { id: 'PH-1', name: 'Fumigation Team A', vehicle: 'Fogging Truck #01', status: 'On Site', location: 'Kopay North Sector 4' },
-      { id: 'PH-2', name: 'Larvicide Spray Team', vehicle: 'Mobile Unit #03', status: 'En Route', location: 'Nallur Drain Line' },
-      { id: 'PH-3', name: 'Bio-Assay Inspection Unit', vehicle: 'Lab Van #02', status: 'Standby', location: 'Health Office HQ' },
+      { id: 'PH-1', name: 'Sanitation Squad A', vehicle: 'Inspection Van #01', status: 'On Site', location: 'Kopay North Sector 4' },
+      { id: 'PH-2', name: 'Water Safety Team', vehicle: 'Mobile Lab Unit #03', status: 'En Route', location: 'Nallur Main Line' },
+      { id: 'PH-3', name: 'Environmental Inspection Unit', vehicle: 'Lab Van #02', status: 'Standby', location: 'Health Office HQ' },
     ],
     metrics: [
-      { label: 'Fumigation Squads', value: '4 Squads', detail: 'Mobile Vector Units', icon: HeartPulse, progress: 78 },
-      { label: 'Bio-Assay Index', value: 'Moderate', detail: 'Dengue Containment Safe', icon: Activity, progress: 65 },
-      { label: 'Larvicide Sectors', value: '12 Zones', detail: 'Chemical Treatment Active', icon: ShieldAlert, progress: 88 },
+      { label: 'Sanitation Squads', value: '4 Squads', detail: 'Mobile Field Units', icon: HeartPulse, progress: 78 },
+      { label: 'Public Health Index', value: 'Moderate', detail: 'Public Health Containment Safe', icon: Activity, progress: 65 },
+      { label: 'Water Quality Zones', value: '12 Zones', detail: 'Treatment Active', icon: ShieldAlert, progress: 88 },
     ],
     actions: [
       { label: 'Deploy Chemical Fogging Squad', actionKey: 'fogging_squad', icon: Send },
@@ -278,7 +278,7 @@ export default function AdminDashboard() {
                 </span>
               </div>
               <p className="text-xs text-emerald-100 mt-0.5 font-medium">
-                {isAdmin ? 'System-wide grievance triage, department routing & dengue outbreak automation' : `Departmental incident triage & rapid risk response`}
+                {isAdmin ? 'System-wide grievance triage, department routing & public safety automation' : `Departmental incident triage & rapid risk response`}
               </p>
             </div>
           </div>
@@ -440,7 +440,7 @@ export default function AdminDashboard() {
       {/* Glowing Metric Cards Grid */}
       <div className="grid grid-cols-2 gap-3.5 lg:grid-cols-4">
         <ProMetricCard icon={FileText} label="Total Incident Reports" value={totalReports} color="emerald" change="+12% this week" />
-        <ProMetricCard icon={AlertTriangle} label="High Dengue Risk" value={highRiskCount} color="red" isPulse change="Active Alert" />
+        <ProMetricCard icon={AlertTriangle} label="High Health & Safety Risk" value={highRiskCount} color="red" isPulse change="Active Alert" />
         <ProMetricCard icon={TrendingUp} label="Active In-Progress" value={inProgressCount} color="amber" change="Under Action" />
         <ProMetricCard icon={CheckCircle2} label="Resolved Tickets" value={resolvedCount} color="blue" change="Closed SLA" />
       </div>
@@ -452,7 +452,7 @@ export default function AdminDashboard() {
           {/* Filter Toolbar */}
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 pb-1">
             <FilterSelect label="Severity" options={['All', 'mild', 'moderate', 'severe']} value={severityFilter} onChange={setSeverityFilter} />
-            <FilterSelect label="Dengue Risk" options={['All', 'Low', 'Medium', 'High']} value={riskFilter} onChange={setRiskFilter} />
+            <FilterSelect label="Public Health Risk" options={['All', 'Low', 'Medium', 'High']} value={riskFilter} onChange={setRiskFilter} />
             <FilterSelect label="Status" options={['All', 'Reported', 'Assigned', 'In Progress', 'Resolved']} value={statusFilter} onChange={setStatusFilter} />
             {isAdmin ? (
               <FilterSelect label="Department Scope" options={['All', ...departments.map(d => d.name)]} value={departmentFilter} onChange={setDepartmentFilter} />
@@ -523,7 +523,7 @@ export default function AdminDashboard() {
             {/* GIS Hazard Map */}
             <div className="space-y-3">
               <h2 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
-                <Eye className="h-4 w-4 text-emerald-600" /> GIS Hazard & Dengue Heatmap
+                <Eye className="h-4 w-4 text-emerald-600" /> GIS Hazard & Public Safety Heatmap
               </h2>
               <div className="h-[440px] overflow-hidden rounded-xl border border-slate-200 shadow-inner">
                 <MapContainer center={mapCenter} zoom={11} scrollWheelZoom={false} style={{ height: '100%', width: '100%', background: '#f8fafc' }}>
@@ -620,7 +620,7 @@ export default function AdminDashboard() {
             <div>
               <h2 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
                 <BarChart3 className="h-4.5 w-4.5 text-emerald-600" />
-                Predictive Dengue & Grievance Telemetry
+                Predictive Hazard & Public Safety Telemetry
               </h2>
               <p className="text-xs text-slate-500 mt-0.5">Automated risk forecasting & resolution progress indicators</p>
             </div>
@@ -647,7 +647,7 @@ export default function AdminDashboard() {
 
                 <div>
                   <div className="flex justify-between font-bold text-slate-700 mb-1">
-                    <span>High Dengue Outbreak Risk</span>
+                    <span>High Public Health Risk</span>
                     <span className="text-amber-600">{highRiskCount} reports</span>
                   </div>
                   <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
@@ -782,7 +782,7 @@ export default function AdminDashboard() {
 
               <div className="space-y-3.5 text-xs">
                 <div>
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Dengue Outbreak Risk</label>
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Public Health & Safety Risk</label>
                   <span className={`inline-block rounded-full px-3 py-1 font-extrabold ${
                     selectedReport.dengue_risk === 'High' ? 'bg-red-500 text-white' : selectedReport.dengue_risk === 'Medium' ? 'bg-amber-500 text-white' : 'bg-emerald-600 text-white'
                   }`}>

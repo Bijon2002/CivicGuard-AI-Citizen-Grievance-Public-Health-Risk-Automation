@@ -1,11 +1,11 @@
 {
   "translation": {
     "app_title": "CivicGuard AI",
-    "app_subtitle": "Report hazards fast. Route them automatically. Flag dengue risk before it spreads.",
-    "app_description": "Citizen upload, AI severity classification, department routing, and weather-based outbreak warnings in one workflow.",
+    "app_subtitle": "Report civic hazards fast. Route them automatically to authorities. Flag public health and safety risks before they escalate.",
+    "app_description": "Citizen upload, AI severity classification, department routing, and weather-based hazard warnings in one workflow.",
     "departments": "Departments",
     "open_reports": "Open reports",
-    "high_dengue_risk": "High dengue risk",
+    "high_dengue_risk": "High public health & safety risk",
     "citizen_report_title": "Citizen report",
     "citizen_report_desc": "Upload a photo, share your location, and let the system route the issue.",
     "latitude": "Latitude",

@@ -89,7 +89,7 @@ export default function AdminLogin() {
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
-              <span>Dengue High-Risk Cluster Detection</span>
+              <span>High-Risk Hazard Cluster Detection</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />

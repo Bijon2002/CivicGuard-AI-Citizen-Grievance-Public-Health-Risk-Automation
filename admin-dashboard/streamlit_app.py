@@ -61,7 +61,7 @@ else:
             st.session_state["logged_in"] = False
             st.rerun()
 
-st.markdown('<div class="hero"><h1>Citizen Grievance-to-Action Dashboard</h1><p>Monitor hazards, routing, and dengue risk flags in one place.</p></div>', unsafe_allow_html=True)
+st.markdown('<div class="hero"><h1>Citizen Grievance-to-Action Dashboard</h1><p>Monitor hazards, routing, and public safety risk flags in one place.</p></div>', unsafe_allow_html=True)
 
 
 @st.cache_data(ttl=30)
@@ -101,7 +101,7 @@ col4.metric("Departments", len(departments))
 
 filters = st.columns(4)
 severity_filter = filters[0].selectbox("Severity", ["All", "mild", "moderate", "severe"])
-risk_filter = filters[1].selectbox("Dengue risk", ["All", "Low", "Medium", "High"])
+risk_filter = filters[1].selectbox("Public health risk", ["All", "Low", "Medium", "High"])
 status_filter = filters[2].selectbox("Status", ["All", "Reported", "Assigned", "In Progress", "Resolved"])
 department_filter = filters[3].selectbox("Department", ["All"] + [item["name"] for item in departments])
 
