@@ -30,8 +30,15 @@ export default function Navigation() {
         
         {/* Brand Logo & Name */}
         <Link to="/" className="flex items-center gap-2 group shrink-0">
-          <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-600 to-teal-700 text-white shadow-emerald-500/25 shadow-md group-hover:scale-105 transition-transform duration-200 shrink-0">
-            <ShieldAlert className="h-4 w-4 sm:h-5 sm:w-5" />
+          <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-xl bg-white border border-slate-200/80 shadow-xs group-hover:scale-105 transition-transform duration-200 shrink-0 overflow-hidden p-0.5">
+            <img 
+              src="/image.png" 
+              alt="CivicGuard AI Logo" 
+              className="h-full w-full object-contain rounded-lg" 
+              onError={(e) => {
+                (e.target as HTMLElement).style.display = 'none';
+              }} 
+            />
           </div>
           <div className="flex flex-col">
             <span className="text-sm sm:text-lg font-black tracking-tight text-slate-900 group-hover:text-emerald-700 transition-colors">
