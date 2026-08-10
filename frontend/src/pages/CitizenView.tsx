@@ -663,20 +663,20 @@ export default function CitizenView() {
   }
 
   return (
-    <div className="text-slate-800">
-      <main className="mx-auto flex min-h-screen max-w-7xl flex-col gap-6 px-4 py-5 sm:px-6 lg:px-8">
+    <div className="text-slate-800 w-full max-w-full overflow-x-hidden">
+      <main className="w-full max-w-7xl mx-auto flex min-h-dvh flex-col gap-5 px-3 py-4 sm:px-6 lg:px-8 pb-safe overflow-x-hidden">
 
         {/* Vibrant Emerald Hero Banner with Generated Graphic Illustration */}
-        <section className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-700 text-white rounded-2xl shadow-lg shadow-emerald-600/20 p-6 sm:p-8 relative overflow-hidden animate-fadeIn">
+        <section className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-700 text-white rounded-2xl shadow-lg shadow-emerald-600/20 p-4 sm:p-7 relative overflow-hidden animate-fadeIn w-full">
           <div className="absolute top-0 right-0 -mt-10 -mr-10 h-64 w-64 rounded-full bg-white/10 blur-2xl pointer-events-none" />
 
           <div className="relative z-10 grid gap-6 lg:grid-cols-[1fr_auto] items-center">
             <div className="space-y-2.5 max-w-2xl">
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 backdrop-blur-md border border-white/30 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-white shadow-2xs">
-                <Sparkles className="h-3.5 w-3.5 text-amber-300" />
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 backdrop-blur-md border border-white/30 px-3 py-1 text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-white shadow-2xs">
+                <Sparkles className="h-3.5 w-3.5 text-amber-300 shrink-0" />
                 AI Public Health & Grievance Automation
               </div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white leading-tight">
+              <h1 className="text-xl sm:text-3xl font-extrabold tracking-tight text-white leading-snug sm:leading-tight">
                 {t('app_subtitle')}
               </h1>
               <p className="text-xs sm:text-sm text-emerald-100 leading-relaxed">
@@ -684,10 +684,10 @@ export default function CitizenView() {
               </p>
 
               {/* Stat Cards Row inside Hero */}
-              <div className="grid grid-cols-3 gap-2.5 sm:gap-3.5 pt-2 max-w-lg">
+              <div className="grid grid-cols-3 gap-2 sm:gap-3.5 pt-2 max-w-lg">
                 <HeroStatCard label={t('departments')} value={departments.length.toString()} icon={Building2} />
                 <HeroStatCard label={t('open_reports')} value={reports.length.toString()} icon={Clock} />
-                <HeroStatCard label={t('high_dengue_risk')} value={highRiskCount.toString()} icon={AlertCircle} isPulse />
+                <HeroStatCard label="High Risk" value={highRiskCount.toString()} icon={AlertCircle} isPulse />
               </div>
             </div>
 
@@ -1059,18 +1059,18 @@ export default function CitizenView() {
               <button
                 type="button"
                 onClick={autofillLocation}
-                className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 transition shadow-2xs"
+                className="inline-flex min-h-[44px] items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 transition shadow-2xs active:scale-95"
               >
-                <Compass className="h-3.5 w-3.5 text-emerald-600" />
+                <Compass className="h-4 w-4 text-emerald-600" />
                 {t('use_location')}
               </button>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-2.5 text-xs sm:text-sm font-bold text-white shadow-lg shadow-emerald-600/25 hover:from-emerald-500 hover:to-teal-500 active:scale-95 transition-all disabled:opacity-60"
+                className="inline-flex min-h-[44px] items-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-2.5 text-xs sm:text-sm font-bold text-white shadow-lg shadow-emerald-600/25 hover:from-emerald-500 hover:to-teal-500 active:scale-95 transition-all disabled:opacity-60"
               >
-                <Send className="h-3.5 w-3.5" />
+                <Send className="h-4 w-4" />
                 {loading ? t('submitting') : t('submit_report')}
               </button>
             </div>
@@ -1237,17 +1237,17 @@ export default function CitizenView() {
 
 function HeroStatCard({ label, value, icon: Icon, isPulse = false }: { label: string; value: string; icon: any; isPulse?: boolean }) {
   return (
-    <div className="rounded-xl bg-white/15 backdrop-blur-md border border-white/25 p-3 sm:p-3.5 text-white flex flex-col justify-between shadow-md">
-      <div className="flex items-center justify-between gap-1 text-[10px] font-extrabold uppercase tracking-wider text-emerald-100">
-        <span className="truncate">{label}</span>
-        <div className="flex h-5.5 w-5.5 shrink-0 items-center justify-center rounded-lg bg-white/20 text-white">
-          <Icon className="h-3.5 w-3.5" />
+    <div className="rounded-xl bg-white/15 backdrop-blur-md border border-white/25 p-2 sm:p-3 text-white flex flex-col justify-between shadow-md min-w-0 overflow-hidden">
+      <div className="flex items-center justify-between gap-1 text-[8.5px] sm:text-[10px] font-extrabold uppercase tracking-wider text-emerald-100">
+        <span className="leading-tight line-clamp-2 break-words">{label}</span>
+        <div className="flex h-4.5 w-4.5 sm:h-5.5 sm:w-5.5 shrink-0 items-center justify-center rounded-lg bg-white/20 text-white">
+          <Icon className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
         </div>
       </div>
-      <div className="mt-2 flex items-baseline justify-between">
-        <span className="text-2xl sm:text-3xl font-black tracking-tight text-white">{value}</span>
+      <div className="mt-1 sm:mt-2 flex items-baseline justify-between">
+        <span className="text-base sm:text-2xl font-black tracking-tight text-white">{value}</span>
         {isPulse && (
-          <span className="flex h-2 w-2 relative">
+          <span className="flex h-2 w-2 relative shrink-0">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
             <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
           </span>

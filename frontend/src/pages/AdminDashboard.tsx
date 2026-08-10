@@ -256,7 +256,7 @@ export default function AdminDashboard() {
   const reportedCount = roleFilteredReports.filter(r => r.status === 'Reported').length;
 
   return (
-    <div className="mx-auto flex min-h-[90vh] max-w-7xl flex-col gap-6 px-4 py-5 sm:px-6 lg:px-8 text-slate-800 animate-fadeIn">
+    <div className="mx-auto flex min-h-dvh max-w-7xl flex-col gap-6 px-3.5 py-4 sm:px-6 lg:px-8 pb-safe text-slate-800 animate-fadeIn">
       <AdminToast toast={toast} />
       
       {/* Vibrant Command Center Banner with Custom 3D Department Graphic */}

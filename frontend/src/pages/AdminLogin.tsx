@@ -37,7 +37,7 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="relative flex min-h-[88vh] items-center justify-center px-4 py-8 overflow-hidden">
+    <div className="relative flex min-h-dvh items-center justify-center px-3.5 py-8 pb-safe overflow-hidden">
       
       {/* Background Graphic Illustration Overlay */}
       <div 
@@ -226,7 +226,7 @@ export default function AdminLogin() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 py-3 text-xs sm:text-sm font-bold text-white shadow-lg shadow-emerald-600/25 hover:from-emerald-500 hover:to-teal-500 active:scale-95 transition-all disabled:opacity-60"
+              className="w-full min-h-[44px] rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 py-3 text-xs sm:text-sm font-bold text-white shadow-lg shadow-emerald-600/25 hover:from-emerald-500 hover:to-teal-500 active:scale-95 transition-all disabled:opacity-60"
             >
               {loading ? 'Authenticating...' : t('login')}
             </button>
