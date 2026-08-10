@@ -24,11 +24,23 @@ export type Report = {
 export type HazardGuidance = {
   hazard_type: string;
   display_name: string;
-  incident_report: string;
-  potential_problems: string[];
-  how_to_overcome: string[];
-  prevention_tips: string[];
-  emergency_note: string;
+  description?: string;
+  incident_report?: string;
+  issues?: string[];
+  potential_problems?: string[];
+  precautions?: string[];
+  how_to_overcome?: string[];
+  byproduct_issues?: string[];
+  prevention_tips?: string[];
+  emergency_note?: string;
+};
+
+export type PredictResponse = {
+  hazard_type: string;
+  severity: string;
+  confidence: number;
+  explanation: string;
+  hazard_guidance?: HazardGuidance | null;
 };
 
 export type ReportDetail = Report & {
@@ -161,6 +173,18 @@ export async function updateReportStatus(reportId: string, status: string) {
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
     throw new Error(errorData.detail || 'Failed to update status');
+  }
+  return response.json();
+}
+
+export async function predictPhoto(formData: FormData): Promise<PredictResponse> {
+  const response = await fetch(`${API_BASE}/reports/predict`, {
+    method: 'POST',
+    body: formData,
+  });
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}));
+    throw new Error(errData.detail || 'Prediction failed');
   }
   return response.json();
 }

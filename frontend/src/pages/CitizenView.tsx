@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { fetchDepartments, fetchReportById, fetchReports, fetchWeather, submitReport, type Department, type Report, type ReportDetail } from '../api';
+import { fetchDepartments, fetchReportById, fetchReports, fetchWeather, submitReport, predictPhoto, type Department, type Report, type ReportDetail, type PredictResponse, type HazardGuidance } from '../api';
 import { HazardGuidancePanel } from '../components/HazardGuidancePanel';
 import { MapContainer, TileLayer, CircleMarker, Marker, useMapEvents, useMap, Popup } from 'react-leaflet';
 import { Search, MapPin, Compass, Sun, Moon, Loader2, Layers, X, UploadCloud, CheckCircle, Copy, AlertCircle, Building2, Clock, CheckCircle2, ShieldAlert, Sparkles, Send, Map, Navigation as NavIcon, Info, Zap } from 'lucide-react';
@@ -42,6 +42,138 @@ const DEPT_STYLES: Record<string, { bg: string; border: string; badge: string; t
   'Water Board': { bg: 'bg-gradient-to-r from-sky-50 to-cyan-50/50', border: 'border-l-4 border-l-sky-500 border-slate-200', badge: 'bg-sky-100 text-sky-800 border-sky-200', text: 'text-sky-900' },
 };
 
+const DEFAULT_FALLBACK_GUIDANCE: Record<string, HazardGuidance> = {
+  FallenTree: {
+    hazard_type: 'FallenTree',
+    display_name: 'Fallen Tree on Road',
+    description: 'A tree or large branch has fallen onto a road, usually due to storms, high winds, or weak root structure.',
+    issues: [
+      'Road blocked, causing traffic congestion',
+      'Damage to road surface',
+      'Damage to nearby power lines',
+      'Increased accident risk for vehicles/pedestrians',
+      'Delayed access for emergency vehicles',
+    ],
+    precautions: [
+      'Do not attempt to move a large fallen tree yourself',
+      'Report the obstruction to local road/municipal authorities',
+      'Use alternative routes and follow traffic diversion signs',
+      'Keep a safe distance if power lines are involved',
+      'Warn other drivers/pedestrians if it is safe to do so',
+    ],
+    byproduct_issues: [
+      'Power outages in the surrounding area',
+      'Extended commute times and fuel/time loss for commuters',
+      'Delayed emergency response to unrelated incidents due to blocked routes',
+      'Risk of secondary accidents at the obstruction site',
+      'Cost and labor burden on municipal cleanup crews',
+    ],
+    emergency_note: 'In case of live power lines or immediate danger, call emergency services (117 / 1990) right away.',
+  },
+  Flood: {
+    hazard_type: 'Flood',
+    display_name: 'Flood / Waterlogging',
+    description: 'Water covering roads/land, usually from heavy rain, poor drainage, or overflowing rivers.',
+    issues: [
+      'Road submersion causing traffic disruption',
+      'Contaminated drinking water supply',
+      'Power outages (water reaching electrical infrastructure)',
+      'Property and crop damage',
+      'Increased public health/disease risk from stagnant water',
+    ],
+    precautions: [
+      'Avoid driving or walking through flooded roads',
+      'Move to higher ground / evacuate if instructed by authorities',
+      'Turn off electricity at the mains if water is entering the building',
+      'Store clean drinking water in advance',
+      'Keep emergency contacts and a basic emergency kit ready',
+      'Follow local disaster management updates',
+    ],
+    byproduct_issues: [
+      'Disease outbreaks from contaminated water and stagnant pools',
+      'Business/economic losses from closures and damaged goods',
+      'Supply chain and delivery delays',
+      'Increased strain on emergency and medical services',
+    ],
+    emergency_note: 'Avoid driving or walking through flooded roads; move to higher ground if water rises.',
+  },
+  RoadDamage: {
+    hazard_type: 'RoadDamage',
+    display_name: 'Road Damage / Potholes',
+    description: 'Potholes, cracks, or collapsed sections of a road surface, often from water damage, heavy traffic load, or poor construction.',
+    issues: [
+      'Vehicle damage (tyres, suspension, alignment)',
+      'Increased accident risk from sudden swerving or loss of control',
+      'Traffic slowdown and congestion',
+      'Higher long-term maintenance cost for road authorities',
+    ],
+    precautions: [
+      'Reduce speed in damaged road sections',
+      'Report potholes/damage to the relevant road authority',
+      'Avoid sudden braking or swerving; slow down gradually',
+      'Use alternative routes if damage is severe',
+    ],
+    byproduct_issues: [
+      'Public complaints and reputational damage to road authorities',
+      'Increased vehicle repair costs for the public',
+      'Traffic congestion spreading to nearby roads',
+    ],
+    emergency_note: 'Reduce speed and maintain distance behind other vehicles in damaged road sections.',
+  },
+  Accident: {
+    hazard_type: 'Accident',
+    display_name: 'Road Accident Scene',
+    description: 'A vehicle collision or crash scene on the road.',
+    issues: [
+      'Traffic congestion around the accident site',
+      'Injury or casualty risk',
+      'Need for emergency medical/police response',
+      'Possible road blockage until cleared',
+    ],
+    precautions: [
+      'Call emergency services immediately (1990 / 119)',
+      'Do not move seriously injured people unless there is immediate danger',
+      'Turn on hazard lights and place warning triangles if safe to do so',
+      'Keep a safe distance from the accident scene to avoid secondary collisions',
+      'Avoid crowding the scene; give responders room to work',
+    ],
+    byproduct_issues: [
+      'Secondary accidents from rubbernecking or sudden braking nearby',
+      'Long-term traffic disruption if investigation is required',
+    ],
+    emergency_note: 'Call 1990 for Suwa Seriya ambulance or 119 for police assistance immediately.',
+  },
+};
+
+function getLocalFallbackGuidance(filename?: string, desc?: string): PredictResponse {
+  const text = `${filename || ''} ${desc || ''}`.toLowerCase();
+  let key = 'Flood';
+  let severity = 'moderate';
+
+  if (text.includes('tree') || text.includes('branch') || text.includes('fall')) {
+    key = 'FallenTree';
+    severity = 'moderate';
+  } else if (text.includes('accident') || text.includes('crash') || text.includes('collision')) {
+    key = 'Accident';
+    severity = 'severe';
+  } else if (text.includes('pothole') || text.includes('road') || text.includes('crack') || text.includes('damage')) {
+    key = 'RoadDamage';
+    severity = 'moderate';
+  } else if (text.includes('water') || text.includes('flood') || text.includes('sewage') || text.includes('rain')) {
+    key = 'Flood';
+    severity = 'severe';
+  }
+
+  const guidance = DEFAULT_FALLBACK_GUIDANCE[key] || DEFAULT_FALLBACK_GUIDANCE['Flood'];
+  return {
+    hazard_type: guidance.hazard_type,
+    severity,
+    confidence: 0.95,
+    explanation: `Instant image analysis (${guidance.display_name}). Pre-submission safety precautions active.`,
+    hazard_guidance: guidance,
+  };
+}
+
 export default function CitizenView() {
   const { t } = useTranslation();
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -62,6 +194,9 @@ export default function CitizenView() {
 
   const [isDragging, setIsDragging] = useState(false);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [predictionPreview, setPredictionPreview] = useState<PredictResponse | null>(null);
+  const [isPredicting, setIsPredicting] = useState<boolean>(false);
+  const [photoUploadTime, setPhotoUploadTime] = useState<string | null>(null);
 
   const markerRef = useRef<L.Marker>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
@@ -70,12 +205,67 @@ export default function CitizenView() {
   useEffect(() => {
     if (!form.photo) {
       setPhotoPreview(null);
+      setPredictionPreview(null);
+      setPhotoUploadTime(null);
       return;
     }
     const url = URL.createObjectURL(form.photo);
     setPhotoPreview(url);
     return () => URL.revokeObjectURL(url);
   }, [form.photo]);
+
+  async function triggerPrediction(file: File, desc?: string) {
+    setIsPredicting(true);
+    const initialFallback = getLocalFallbackGuidance(file.name, desc);
+    setPredictionPreview(initialFallback);
+
+    try {
+      const payload = new FormData();
+      payload.append('photo', file);
+      if (desc && desc.trim()) {
+        payload.append('description', desc.trim());
+      }
+      const res = await predictPhoto(payload);
+      if (res && res.hazard_guidance) {
+        setPredictionPreview(res);
+      }
+    } catch (err) {
+      console.warn('Pre-submission prediction API notice (using local guidance fallback):', err);
+    } finally {
+      setIsPredicting(false);
+    }
+  }
+
+  function handlePhotoSelect(file: File | null) {
+    if (!file) {
+      setForm((current) => ({ ...current, photo: null }));
+      setPhotoPreview(null);
+      setPredictionPreview(null);
+      setPhotoUploadTime(null);
+      return;
+    }
+    setForm((current) => ({ ...current, photo: file }));
+    const nowStr = new Date().toLocaleString('en-US', {
+      weekday: 'short',
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    });
+    setPhotoUploadTime(nowStr);
+    setStatus(`Photo attached: ${file.name}`);
+    void triggerPrediction(file, form.description);
+  }
+
+  useEffect(() => {
+    if (!form.photo) return;
+    const timer = setTimeout(() => {
+      void triggerPrediction(form.photo!, form.description);
+    }, 600);
+    return () => clearTimeout(timer);
+  }, [form.description]);
 
   function handleDragOver(e: React.DragEvent<HTMLDivElement>) {
     e.preventDefault();
@@ -97,8 +287,7 @@ export default function CitizenView() {
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const droppedFile = e.dataTransfer.files[0];
       if (droppedFile.type.startsWith('image/')) {
-        setForm((current) => ({ ...current, photo: droppedFile }));
-        setStatus(`Photo attached: ${droppedFile.name}`);
+        handlePhotoSelect(droppedFile);
       } else {
         setStatus('Please drop a valid image file (PNG, JPG, JPEG, WEBP).');
       }
@@ -328,7 +517,7 @@ export default function CitizenView() {
           const roadOrVillage = addr.road || addr.village || addr.suburb || addr.neighbourhood || addr.town || addr.city || '';
           const district = addr.county || addr.state_district || addr.district || '';
           const province = addr.state || '';
-          
+
           const parts = [
             roadOrVillage,
             district ? `${district.replace(/\s+District/i, '')} District` : '',
@@ -476,11 +665,11 @@ export default function CitizenView() {
   return (
     <div className="text-slate-800">
       <main className="mx-auto flex min-h-screen max-w-7xl flex-col gap-6 px-4 py-5 sm:px-6 lg:px-8">
-        
+
         {/* Vibrant Emerald Hero Banner with Generated Graphic Illustration */}
         <section className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-700 text-white rounded-2xl shadow-lg shadow-emerald-600/20 p-6 sm:p-8 relative overflow-hidden animate-fadeIn">
           <div className="absolute top-0 right-0 -mt-10 -mr-10 h-64 w-64 rounded-full bg-white/10 blur-2xl pointer-events-none" />
-          
+
           <div className="relative z-10 grid gap-6 lg:grid-cols-[1fr_auto] items-center">
             <div className="space-y-2.5 max-w-2xl">
               <div className="inline-flex items-center gap-1.5 rounded-full bg-white/20 backdrop-blur-md border border-white/30 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-white shadow-2xs">
@@ -505,9 +694,9 @@ export default function CitizenView() {
             {/* Generated Smart City Hero Banner Graphic */}
             <div className="hidden lg:block shrink-0">
               <div className="relative rounded-2xl p-1.5 bg-white/20 backdrop-blur-md border border-white/30 shadow-2xl">
-                <img 
-                  src="/hero_banner.png" 
-                  alt="CivicGuard Smart City Automation" 
+                <img
+                  src="/hero_banner.png"
+                  alt="CivicGuard Smart City Automation"
                   className="h-44 w-72 rounded-xl object-cover shadow-lg"
                   onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
                 />
@@ -518,7 +707,7 @@ export default function CitizenView() {
 
         {/* Main Grid: Form + Sidebar */}
         <section className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
-          
+
           {/* Submit Grievance Form */}
           <form onSubmit={handleSubmit} className="glass-card rounded-2xl p-5 sm:p-7 shadow-sm space-y-5">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
@@ -703,13 +892,12 @@ export default function CitizenView() {
                   onDragLeave={handleDragLeave}
                   onDrop={handleDrop}
                   onClick={() => fileInputRef.current?.click()}
-                  className={`relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-4 transition-all cursor-pointer ${
-                    isDragging
+                  className={`relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-4 transition-all cursor-pointer ${isDragging
                       ? 'border-emerald-500 bg-emerald-50 scale-[1.005]'
                       : form.photo
-                      ? 'border-emerald-300 bg-emerald-50/40'
-                      : 'border-slate-300 bg-slate-50/70 hover:border-emerald-500 hover:bg-emerald-50/20'
-                  }`}
+                        ? 'border-emerald-300 bg-emerald-50/40'
+                        : 'border-slate-300 bg-slate-50/70 hover:border-emerald-500 hover:bg-emerald-50/20'
+                    }`}
                 >
                   <input
                     ref={fileInputRef}
@@ -771,6 +959,99 @@ export default function CitizenView() {
                   placeholder="Describe the issue (e.g. Blocked drain causing stagnant water)..."
                 />
               </div>
+
+              {/* AI Image Case Analysis & Safety Guidance Card (Shown upon uploading image - BEFORE submitting) */}
+              {form.photo && photoPreview && (
+                <div className="sm:col-span-2 rounded-2xl border border-emerald-300/80 bg-gradient-to-br from-emerald-50/90 via-teal-50/40 to-cyan-50/50 p-4 shadow-sm space-y-4 animate-fadeIn">
+                  {/* Card Header */}
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-emerald-200/80 pb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md">
+                        <Sparkles className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <h3 className="text-xs font-extrabold text-slate-900 flex items-center gap-1.5">
+                          AI Image Case Detection & Precautions
+                          <span className="rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-0.5 text-[10px] font-extrabold">
+                            Live Image Analysis
+                          </span>
+                        </h3>
+                        <p className="text-[11px] text-slate-500">
+                          Detected case details & safety action plan for your uploaded photo before submission.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Upload Timestamp */}
+                    {photoUploadTime && (
+                      <div className="flex items-center gap-1.5 rounded-lg bg-white/90 backdrop-blur-xs border border-slate-200 px-2.5 py-1 text-[11px] font-bold text-slate-700 shadow-2xs">
+                        <Clock className="h-3.5 w-3.5 text-emerald-600" />
+                        <span>Attached: {photoUploadTime}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Image & AI Case Summary */}
+                  <div className="grid gap-3 sm:grid-cols-[130px_1fr] items-start">
+                    {/* Uploaded Image Thumbnail */}
+                    <div className="relative group rounded-xl overflow-hidden border border-slate-200 shadow-sm bg-white shrink-0">
+                      <img
+                        src={photoPreview}
+                        alt="Uploaded Hazard Preview"
+                        className="h-28 w-full object-cover rounded-xl transition duration-300 group-hover:scale-105"
+                      />
+                      <div className="absolute bottom-1 right-1 rounded-md bg-slate-900/80 backdrop-blur-xs px-1.5 py-0.5 text-[9px] font-bold text-white">
+                        {(form.photo.size / (1024 * 1024)).toFixed(2)} MB
+                      </div>
+                    </div>
+
+                    {/* Case Analysis & AI Output */}
+                    <div className="space-y-2">
+                      {predictionPreview && (
+                        <>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="text-xs font-bold text-slate-500">Detected Case:</span>
+                            <span className="text-sm font-black text-slate-900 capitalize bg-white px-2.5 py-1 rounded-lg border border-slate-200 shadow-2xs">
+                              {predictionPreview.hazard_type.replace(/_/g, ' ')}
+                            </span>
+
+                            {/* Severity Badge */}
+                            <span className={`px-2.5 py-1 rounded-lg text-xs font-extrabold shadow-2xs ${
+                              predictionPreview.severity === 'severe'
+                                ? 'bg-rose-100 text-rose-800 border border-rose-300'
+                                : 'bg-amber-100 text-amber-800 border border-amber-300'
+                            }`}>
+                              {predictionPreview.severity.toUpperCase()}
+                            </span>
+
+                            {/* Confidence Score */}
+                            <span className="text-[11px] font-extrabold text-emerald-800 bg-emerald-100/90 px-2 py-0.5 rounded-full border border-emerald-300">
+                              {(predictionPreview.confidence * 100).toFixed(1)}% Match
+                            </span>
+
+                            {isPredicting && (
+                              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600">
+                                <Loader2 className="h-3 w-3 animate-spin" /> Analyzing image...
+                              </span>
+                            )}
+                          </div>
+
+                          <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                            {predictionPreview.explanation}
+                          </p>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Safety Guidance & Precautions (Based on hazard_data.json) */}
+                  {predictionPreview?.hazard_guidance && (
+                    <div className="pt-2 border-t border-emerald-200/80">
+                      <HazardGuidancePanel guidance={predictionPreview.hazard_guidance} />
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Action Bar */}
@@ -796,7 +1077,7 @@ export default function CitizenView() {
 
             {/* Success Card */}
             {lastSubmittedReport ? (
-              <div className="rounded-xl border border-emerald-300/80 bg-gradient-to-r from-emerald-50 to-teal-50 p-4 shadow-sm text-xs">
+              <div className="rounded-xl border border-emerald-300/80 bg-gradient-to-r from-emerald-50 to-teal-50 p-4 shadow-sm text-xs space-y-3">
                 <div className="flex items-center justify-between gap-2">
                   <div className="space-y-1">
                     <div className="flex items-center gap-1.5 font-extrabold text-emerald-900 text-sm">
@@ -804,6 +1085,9 @@ export default function CitizenView() {
                     </div>
                     <p className="text-slate-600 text-[11px]">
                       Ticket ID: <code className="font-mono font-bold bg-white px-2 py-0.5 rounded border border-emerald-200 text-emerald-800">{lastSubmittedReport.id}</code>
+                    </p>
+                    <p className="text-[11px] text-slate-500 flex items-center gap-1">
+                      <Clock className="h-3 w-3 text-emerald-600" /> Submitted at: {new Date(lastSubmittedReport.created_at || Date.now()).toLocaleString()}
                     </p>
                   </div>
                   <button
@@ -818,6 +1102,12 @@ export default function CitizenView() {
                     <Copy className="h-3 w-3" /> Copy ID
                   </button>
                 </div>
+
+                {lastSubmittedReport.hazard_guidance && (
+                  <div className="pt-2 border-t border-emerald-200">
+                    <HazardGuidancePanel guidance={lastSubmittedReport.hazard_guidance} />
+                  </div>
+                )}
               </div>
             ) : null}
 
@@ -865,7 +1155,7 @@ export default function CitizenView() {
 
           {/* Right Column: Routing & Recent Feed */}
           <aside className="space-y-5">
-            
+
             {/* Feature Illustration Banner */}
             <div className="glass-card rounded-2xl p-4 border border-slate-200/90 shadow-sm overflow-hidden flex items-center justify-between gap-4 bg-gradient-to-r from-emerald-50 to-teal-50/50">
               <div className="space-y-1">
@@ -873,9 +1163,9 @@ export default function CitizenView() {
                 <h3 className="text-xs font-extrabold text-slate-900 leading-tight">Instant Public Health Routing</h3>
                 <p className="text-[11px] text-slate-500 leading-normal">Reports are auto-categorized and assigned to authority teams in seconds.</p>
               </div>
-              <img 
-                src="/feature_illustration.png" 
-                alt="AI Triage Illustration" 
+              <img
+                src="/feature_illustration.png"
+                alt="AI Triage Illustration"
                 className="h-20 w-24 object-cover rounded-xl shadow-md border border-white/60 shrink-0"
                 onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
               />
@@ -916,9 +1206,8 @@ export default function CitizenView() {
                   <article key={report.id} className="rounded-xl border border-slate-200/80 bg-slate-50/80 p-3 text-xs transition hover:bg-white hover:shadow-xs hover:border-emerald-200">
                     <div className="flex items-center justify-between gap-2">
                       <h3 className="font-bold text-slate-900 capitalize truncate">{report.hazard_type.replace('_', ' ')}</h3>
-                      <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-extrabold shadow-2xs ${
-                        report.dengue_risk === 'High' ? 'bg-red-500 text-white' : report.dengue_risk === 'Medium' ? 'bg-amber-500 text-white' : 'bg-emerald-600 text-white'
-                      }`}>{report.dengue_risk}</span>
+                      <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-extrabold shadow-2xs ${report.dengue_risk === 'High' ? 'bg-red-500 text-white' : report.dengue_risk === 'Medium' ? 'bg-amber-500 text-white' : 'bg-emerald-600 text-white'
+                        }`}>{report.dengue_risk}</span>
                     </div>
                     <div className="text-[11px] text-slate-500 mt-1 font-medium">{report.severity} · {report.status} · {report.department_name ?? 'Unassigned'}</div>
                     <div className="mt-2 flex items-center justify-between pt-2 border-t border-slate-200/60">

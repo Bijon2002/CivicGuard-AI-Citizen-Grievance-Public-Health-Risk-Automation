@@ -1,0 +1,106 @@
+{
+  "Flood": {
+    "description": "Water covering roads/land, usually from heavy rain, poor drainage, or overflowing rivers.",
+    "issues": [
+      "Road submersion causing traffic disruption",
+      "Contaminated drinking water supply",
+      "Power outages (water reaching electrical infrastructure)",
+      "Property and crop damage",
+      "School and business closures",
+      "Displacement of residents",
+      "Increased public health/disease risk from stagnant water"
+    ],
+    "precautions": [
+      "Avoid driving or walking through flooded roads",
+      "Move to higher ground / evacuate if instructed by authorities",
+      "Turn off electricity at the mains if water is entering the building",
+      "Store clean drinking water in advance",
+      "Keep emergency contacts and a basic emergency kit ready",
+      "Follow local disaster management updates"
+    ],
+    "byproduct_issues": [
+      "Disease outbreaks from contaminated water and stagnant pools",
+      "Business/economic losses from closures and damaged goods",
+      "Supply chain and delivery delays",
+      "Increased strain on emergency and medical services",
+      "Mental health stress from displacement and loss of property",
+      "Secondary road accidents from poor visibility and slippery surfaces"
+    ]
+  },
+  "FallenTree": {
+    "description": "A tree or large branch has fallen onto a road, usually due to storms, high winds, or weak root structure.",
+    "issues": [
+      "Road blocked, causing traffic congestion",
+      "Damage to road surface",
+      "Damage to nearby power lines",
+      "Increased accident risk for vehicles/pedestrians",
+      "Delayed access for emergency vehicles"
+    ],
+    "precautions": [
+      "Do not attempt to move a large fallen tree yourself",
+      "Report the obstruction to local road/municipal authorities",
+      "Use alternative routes and follow traffic diversion signs",
+      "Keep a safe distance if power lines are involved",
+      "Warn other drivers/pedestrians if it's safe to do so"
+    ],
+    "byproduct_issues": [
+      "Power outages in the surrounding area",
+      "Extended commute times and fuel/time loss for commuters",
+      "Delayed emergency response to unrelated incidents due to blocked routes",
+      "Risk of secondary accidents at the obstruction site",
+      "Cost and labor burden on municipal cleanup crews"
+    ]
+  },
+  "RoadDamage": {
+    "description": "Potholes, cracks, or collapsed sections of a road surface, often from water damage, heavy traffic load, or poor construction.",
+    "issues": [
+      "Vehicle damage (tyres, suspension, alignment)",
+      "Increased accident risk from sudden swerving or loss of control",
+      "Traffic slowdown and congestion",
+      "Higher long-term maintenance cost for road authorities"
+    ],
+    "precautions": [
+      "Reduce speed in damaged road sections",
+      "Report potholes/damage to the relevant road authority",
+      "Avoid sudden braking or swerving; slow down gradually",
+      "Use alternative routes if damage is severe"
+    ],
+    "byproduct_issues": [
+      "Public complaints and reputational damage to road authorities",
+      "Increased vehicle repair costs for the public",
+      "Traffic congestion spreading to nearby roads",
+      "Higher accident insurance claims in the area"
+    ]
+  },
+  "Accident": {
+    "description": "A vehicle collision or crash scene on the road.",
+    "issues": [
+      "Traffic congestion around the accident site",
+      "Injury or casualty risk",
+      "Need for emergency medical/police response",
+      "Possible road blockage until cleared"
+    ],
+    "precautions": [
+      "Call emergency services immediately",
+      "Do not move seriously injured people unless there is immediate danger",
+      "Turn on hazard lights and place warning triangles if safe to do so",
+      "Keep a safe distance from the accident scene to avoid secondary collisions",
+      "Avoid crowding the scene; give responders room to work"
+    ],
+    "byproduct_issues": [
+      "Secondary accidents from rubbernecking or sudden braking nearby",
+      "Legal and insurance disputes",
+      "Long-term traffic disruption if investigation is required",
+      "Emotional/psychological impact on those involved"
+    ]
+  },
+  "NoHazard": {
+    "description": "No visible hazard detected in the image; road/scene appears normal.",
+    "issues": [],
+    "precautions": [
+      "No immediate action needed",
+      "Continue routine road monitoring"
+    ],
+    "byproduct_issues": []
+  }
+}

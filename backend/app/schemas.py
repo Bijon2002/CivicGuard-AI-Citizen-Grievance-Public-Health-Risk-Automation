@@ -55,11 +55,15 @@ class PredictionOut(BaseModel):
 class HazardGuidanceOut(BaseModel):
     hazard_type: str
     display_name: str
-    incident_report: str
-    potential_problems: list[str]
-    how_to_overcome: list[str]
-    prevention_tips: list[str]
-    emergency_note: str
+    description: str = ""
+    incident_report: str = ""
+    issues: list[str] = Field(default_factory=list)
+    potential_problems: list[str] = Field(default_factory=list)
+    precautions: list[str] = Field(default_factory=list)
+    how_to_overcome: list[str] = Field(default_factory=list)
+    byproduct_issues: list[str] = Field(default_factory=list)
+    prevention_tips: list[str] = Field(default_factory=list)
+    emergency_note: str = ""
 
 
 class ReportPublicOut(BaseModel):
