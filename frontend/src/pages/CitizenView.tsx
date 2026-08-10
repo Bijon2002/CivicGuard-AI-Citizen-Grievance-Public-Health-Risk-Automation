@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { fetchDepartments, fetchReportById, fetchReports, fetchWeather, submitReport, type Department, type Report, type ReportDetail } from '../api';
+import { HazardGuidancePanel } from '../components/HazardGuidancePanel';
 import { MapContainer, TileLayer, CircleMarker, Marker, useMapEvents, useMap, Popup } from 'react-leaflet';
 import { Search, MapPin, Compass, Sun, Moon, Loader2, Layers, X, UploadCloud, CheckCircle, Copy, AlertCircle, Building2, Clock, CheckCircle2, ShieldAlert, Sparkles, Send, Map, Navigation as NavIcon, Info, Zap } from 'lucide-react';
 import L from 'leaflet';
@@ -854,6 +855,9 @@ export default function CitizenView() {
                   <div className="font-extrabold text-slate-900 capitalize">{reportDetail.hazard_type}</div>
                   <div>Severity: <span className="font-bold text-slate-700">{reportDetail.severity}</span> · Status: <span className="font-bold text-emerald-700">{reportDetail.status}</span></div>
                   {reportDetail.description && <p className="text-slate-500 italic mt-1">"{reportDetail.description}"</p>}
+                  <div className="pt-2">
+                    <HazardGuidancePanel guidance={reportDetail.hazard_guidance} />
+                  </div>
                 </div>
               ) : null}
             </div>

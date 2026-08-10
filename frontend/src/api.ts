@@ -21,6 +21,16 @@ export type Report = {
   description?: string | null;
 };
 
+export type HazardGuidance = {
+  hazard_type: string;
+  display_name: string;
+  incident_report: string;
+  potential_problems: string[];
+  how_to_overcome: string[];
+  prevention_tips: string[];
+  emergency_note: string;
+};
+
 export type ReportDetail = Report & {
   description?: string | null;
   confidence: number;
@@ -46,6 +56,7 @@ export type ReportDetail = Report & {
     raw_output?: string | null;
     created_at: string;
   }>;
+  hazard_guidance?: HazardGuidance | null;
 };
 
 export async function fetchDepartments(): Promise<Department[]> {

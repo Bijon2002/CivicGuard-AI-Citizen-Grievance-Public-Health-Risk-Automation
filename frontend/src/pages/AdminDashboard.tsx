@@ -5,6 +5,7 @@ import { LogOut, ShieldCheck, Building2, HeartPulse, Truck, Droplets, AlertTrian
 import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { fetchDepartments, fetchReports, fetchSupabaseHealth, type Department, type Report } from '../api';
+import { HazardGuidancePanel } from '../components/HazardGuidancePanel';
 
 const ROLE_CONFIG: Record<string, { icon: any; gradient: string; label: string }> = {
   admin: { icon: ShieldCheck, gradient: 'bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-700', label: 'System Administrator' },
@@ -816,6 +817,8 @@ export default function AdminDashboard() {
                     </p>
                   </div>
                 ) : null}
+
+                <HazardGuidancePanel guidance={selectedReport.hazard_guidance} />
               </div>
             </div>
 

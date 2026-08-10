@@ -10,8 +10,9 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.deps import db_session, require_role
 from app.models import PredictionAudit, Report, StatusLog, User
-from app.schemas import PredictResponse, PredictionOut, ReportCreatedResponse, ReportOut, ReportPublicOut, ReportStatusUpdate, StatusLogOut
+from app.schemas import HazardGuidanceOut, PredictResponse, PredictionOut, ReportCreatedResponse, ReportOut, ReportPublicOut, ReportStatusUpdate, StatusLogOut
 from app.services.dengue_risk import calculate_dengue_risk
+from app.services.hazard_advice import get_hazard_advice
 from app.services.ml import classify_report, prediction_to_dict
 from app.services.routing import route_issue
 from app.services.storage import save_photo
@@ -30,6 +31,7 @@ def _serialize_report(report: Report) -> ReportOut:
     ]
     predictions = [PredictionOut.model_validate(item, from_attributes=True) for item in report.prediction_audits]
     department_name = report.department.name if report.department else None
+    advice = get_hazard_advice(report.hazard_type)
     return ReportOut(
         id=report.id,
         photo_url=report.photo_url,
@@ -48,6 +50,17 @@ def _serialize_report(report: Report) -> ReportOut:
         department_name=department_name,
         status_history=status_history,
         predictions=predictions,
+        hazard_guidance=HazardGuidanceOut.model_validate(
+            {
+                "hazard_type": advice.hazard_type,
+                "display_name": advice.display_name,
+                "incident_report": advice.incident_report,
+                "potential_problems": advice.potential_problems,
+                "how_to_overcome": advice.how_to_overcome,
+                "prevention_tips": advice.prevention_tips,
+                "emergency_note": advice.emergency_note,
+            }
+        ),
     )
 
 

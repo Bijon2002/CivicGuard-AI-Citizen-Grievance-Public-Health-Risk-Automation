@@ -7,6 +7,8 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
+from app.services.hazard_advice import get_hazard_advice
+
 # Suppress TF logging
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
@@ -22,11 +24,25 @@ class PredictionResult:
 
 
 KEYWORD_RULES: list[tuple[tuple[str, ...], str, str]] = [
-    (("sewage", "overflow", "drain", "drainage", "stagnant"), "severe", "sewage_overflow"),
-    (("blocked", "choked", "clogged", "garbage", "dump"), "moderate", "blocked_drain"),
-    (("road", "pothole", "damage", "broken"), "moderate", "road_damage"),
-    (("tree", "fallen", "branch"), "moderate", "fallen_tree"),
-    (("water", "flood", "flooding", "pond"), "severe", "water_logging"),
+    (("flood surge", "storm surge", "coastal flooding", "high waves", "flood", "waterlogging", "water logging", "inundated"), "severe", "water_logging"),
+    (("heavy rain", "downpour", "rainstorm", "torrential rain"), "severe", "heavy_rain"),
+    (("sewage", "overflow", "sewer"), "severe", "sewage_overflow"),
+    (("blocked", "choked", "clogged", "drainage", "drain"), "moderate", "blocked_drain"),
+    (("road construction", "trenches", "barrier", "excavation"), "moderate", "road_construction_hazard"),
+    (("pothole", "crack", "uneven road", "road collapse", "damaged road"), "moderate", "road_damage"),
+    (("tree fallen", "fallen tree", "branch", "leaning tree", "tree at risk"), "moderate", "fallen_tree"),
+    (("power line", "live wire", "fallen wire", "electrical wire"), "severe", "fallen_power_line"),
+    (("building collapse", "structural damage", "collapsed building", "damaged building"), "severe", "building_collapse"),
+    (("fire", "smoke", "burning"), "severe", "fire"),
+    (("burst pipe", "pipe burst", "water pipe", "water leak"), "moderate", "burst_water_pipe"),
+    (("traffic signal", "signal failure", "traffic light"), "moderate", "traffic_signal_failure"),
+    (("animal on road", "stray animal", "large animal", "cow on road", "dog on road"), "moderate", "stray_animals_on_road"),
+    (("landslide", "mudslide", "rockfall", "rocks falling"), "severe", "landslide"),
+    (("strong wind", "wind damage", "gust"), "moderate", "strong_wind"),
+    (("chemical spill", "toxic spill", "hazmat"), "severe", "chemical_spill"),
+    (("waste dumping", "garbage dump", "illegal dumping", "trash"), "moderate", "illegal_waste_dumping"),
+    (("stagnant water", "standing water"), "moderate", "stagnant_water"),
+    (("rodent", "rats", "mice infestation"), "moderate", "rodent_infestation"),
 ]
 
 MODEL_DIR = Path(__file__).resolve().parent.parent.parent / "models"
@@ -91,6 +107,15 @@ def classify_report(image_path: Path, description: str | None = None) -> Predict
             matched_rule = True
             break
 
+    if matched_rule:
+        advice = get_hazard_advice(inferred_hazard)
+        return PredictionResult(
+            hazard_type=inferred_hazard,
+            severity=inferred_severity,
+            confidence=0.90,
+            explanation=f"Categorized as {advice.display_name} using keyword heuristic.",
+        )
+
     # 2. Try ML model inference if TensorFlow and model file are available
     try:
         model = get_model()
@@ -119,7 +144,8 @@ def classify_report(image_path: Path, description: str | None = None) -> Predict
 
     # 3. Fallback result when TensorFlow is not installed or model is unavailable
     confidence = 0.85 if matched_rule else 0.70
-    explanation = f"Categorized as {inferred_hazard} using keyword heuristic."
+    advice = get_hazard_advice(inferred_hazard)
+    explanation = f"Categorized as {advice.display_name} using keyword heuristic."
     return PredictionResult(
         hazard_type=inferred_hazard,
         severity=inferred_severity,
@@ -129,9 +155,19 @@ def classify_report(image_path: Path, description: str | None = None) -> Predict
 
 
 def prediction_to_dict(prediction: PredictionResult) -> dict[str, object]:
+    advice = get_hazard_advice(prediction.hazard_type)
     return {
         "hazard_type": prediction.hazard_type,
         "severity": prediction.severity,
         "confidence": prediction.confidence,
         "explanation": prediction.explanation,
+        "hazard_guidance": {
+            "hazard_type": advice.hazard_type,
+            "display_name": advice.display_name,
+            "incident_report": advice.incident_report,
+            "potential_problems": advice.potential_problems,
+            "how_to_overcome": advice.how_to_overcome,
+            "prevention_tips": advice.prevention_tips,
+            "emergency_note": advice.emergency_note,
+        },
     }

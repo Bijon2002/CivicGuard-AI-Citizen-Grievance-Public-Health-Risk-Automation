@@ -52,6 +52,16 @@ class PredictionOut(BaseModel):
     created_at: datetime
 
 
+class HazardGuidanceOut(BaseModel):
+    hazard_type: str
+    display_name: str
+    incident_report: str
+    potential_problems: list[str]
+    how_to_overcome: list[str]
+    prevention_tips: list[str]
+    emergency_note: str
+
+
 class ReportPublicOut(BaseModel):
     id: str
     photo_url: str
@@ -73,6 +83,7 @@ class ReportOut(ReportPublicOut):
     updated_at: datetime
     status_history: list[StatusLogOut] = Field(default_factory=list)
     predictions: list[PredictionOut] = Field(default_factory=list)
+    hazard_guidance: HazardGuidanceOut | None = None
 
 
 class ReportStatusUpdate(BaseModel):
@@ -102,3 +113,4 @@ class PredictResponse(BaseModel):
     severity: str
     confidence: float
     explanation: str
+    hazard_guidance: HazardGuidanceOut | None = None
